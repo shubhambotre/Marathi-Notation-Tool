@@ -20,7 +20,7 @@ const TAALS: Record<string, TaalConfig> = {
   teental: {
     name: 'Teental',
     beats: 16,
-    bols: ['धा', 'धिन्', 'धिन्', 'धा', 'धा', 'धिन्', 'धिन्', 'धा', 'धा', 'तिन्', 'तिन्', 'ता', 'ता', 'धिन्', 'धिन्', 'धा'],
+    bols: ['धा', 'धिन', 'धिन', 'धा', 'धा', 'धिन', 'धिन', 'धा', 'धा', 'तिन', 'तिन', 'ता', 'ता', 'धिन', 'धिन', 'धा'],
     markers: ['x', '', '', '', '2', '', '', '', '0', '', '', '', '3', '', '', '']
   },
   dadra: {
@@ -649,8 +649,8 @@ const App: React.FC = () => {
                 {taal.bols.map((bol, i) => (
                   <div key={i} className="taal-header-cell">
                     <div className="beat-num">{i + 1}</div>
-                    <div className="beat-bol">{bol}</div>
-                    <div className="beat-marker">{taal.markers[i]}</div>
+                    <div className="beat-bol lobster-regular">{bol}</div>
+                    <div className="beat-marker lobster-regular">{taal.markers[i]}</div>
                   </div>
                 ))}
               </div>
