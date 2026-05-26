@@ -1,8 +1,13 @@
 import os
+import json
+import io
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from passlib.hash import pbkdf2_sha256
 from docx import Document
-from docx.shared import Pt, RGBColor
+from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -10,10 +15,160 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-import io
 
 app = Flask(__name__)
 CORS(app)
+
+# Database Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///marathi_notations.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'super-secret-key-change-this-in-production'
+import datetime
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
+
+db = SQLAlchemy(app)
+jwt = JWTManager(app)
+
+import datetime
+
+# Models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    secret_question = db.Column(db.String(200), nullable=True)
+    secret_answer = db.Column(db.String(120), nullable=True)
+    notations = db.relationship('Notation', backref='user', lazy=True)
+
+class Notation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    taal_key = db.Column(db.String(50), nullable=False)
+    data = db.Column(db.Text, nullable=False) # JSON string of rows
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+with app.app_context():
+    db.create_all()
+
+@app.route('/')
+def home():
+    return {"status": "Backend is running", "message": "Marathi Music Notation API is active"}, 200
+
+# Auth Routes
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    data = request.json
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({"msg": "Username already exists"}), 400
+    
+    hashed_password = pbkdf2_sha256.hash(data['password'])
+    new_user = User(
+        username=data['username'], 
+        password=hashed_password,
+        secret_question=data.get('secret_question'),
+        secret_answer=data.get('secret_answer')
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"msg": "User created successfully"}), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    user = User.query.filter_by(username=data['username']).first()
+    if user and pbkdf2_sha256.verify(data['password'], user.password):
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify(access_token=access_token, username=user.username), 200
+    return jsonify({"msg": "Bad username or password"}), 401
+
+@app.route('/api/recover-password', methods=['POST'])
+def recover_password():
+    data = request.json
+    user = User.query.filter_by(username=data['username']).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+    
+    if data.get('secret_answer') == user.secret_answer:
+        new_hashed = pbkdf2_sha256.hash(data['new_password'])
+        user.password = new_hashed
+        db.session.commit()
+        return jsonify({"msg": "Password reset successful"}), 200
+    
+    return jsonify({"msg": "Incorrect secret answer", "question": user.secret_question}), 400
+
+@app.route('/api/get-question/<username>', methods=['GET'])
+def get_question(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return jsonify({"question": user.secret_question}), 200
+    return jsonify({"msg": "User not found"}), 404
+
+# Data Routes
+@app.route('/api/notations', methods=['POST'])
+@jwt_required()
+def save_notation():
+    user_id = int(get_jwt_identity())
+    data = request.json
+    
+    notation_id = data.get('id')
+    if notation_id:
+        # Convert to int to be safe
+        try:
+            n_id = int(notation_id)
+            notation = Notation.query.filter_by(id=n_id, user_id=user_id).first()
+            if notation:
+                notation.title = data['title']
+                notation.taal_key = data['taal_key']
+                notation.data = json.dumps(data['rows'])
+                db.session.commit()
+                return jsonify({
+                    "msg": "Notation updated", 
+                    "id": notation.id,
+                    "updated_at": notation.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+                }), 200
+        except (ValueError, TypeError):
+            pass
+
+    new_notation = Notation(
+        title=data['title'],
+        taal_key=data['taal_key'],
+        data=json.dumps(data['rows']),
+        user_id=user_id
+    )
+    db.session.add(new_notation)
+    db.session.commit()
+    return jsonify({
+        "msg": "Notation saved", 
+        "id": new_notation.id,
+        "created_at": new_notation.created_at.strftime('%Y-%m-%d %H:%M:%S')
+    }), 201
+
+@app.route('/api/notations', methods=['GET'])
+@jwt_required()
+def get_notations():
+    user_id = get_jwt_identity()
+    notations = Notation.query.filter_by(user_id=user_id).order_by(Notation.updated_at.desc()).all()
+    return jsonify([{
+        "id": n.id,
+        "title": n.title,
+        "taal_key": n.taal_key,
+        "rows": json.loads(n.data),
+        "created_at": n.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        "updated_at": n.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+    } for n in notations]), 200
+
+@app.route('/api/notations/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_notation(id):
+    user_id = get_jwt_identity()
+    notation = Notation.query.filter_by(id=id, user_id=user_id).first()
+    if notation:
+        db.session.delete(notation)
+        db.session.commit()
+        return jsonify({"msg": "Notation deleted"}), 200
+    return jsonify({"msg": "Notation not found"}), 404
 
 # Font configuration
 # Nirmala UI is a common Windows font that supports Devanagari
@@ -100,11 +255,13 @@ def create_pdf(data):
     doc = SimpleDocTemplate(file_stream, pagesize=A4)
     styles = getSampleStyleSheet()
     
+    font_size = data.get('font_size', 12)
+    
     marathi_style = ParagraphStyle(
         'MarathiStyle',
         parent=styles['Normal'],
         fontName=PDF_FONT,
-        fontSize=10,
+        fontSize=font_size,
         alignment=1 
     )
     
@@ -119,7 +276,7 @@ def create_pdf(data):
     markers = taal_config.get('markers', [])
     beat_nums = [str(i+1) for i in range(beats)]
 
-    # Taal Header
+    # Taal Header - Keeping grid for header but removing for notation as requested
     header_table_data = [beat_nums, bols, markers]
     col_width = (A4[0] - 80) / beats
     t = Table(header_table_data, colWidths=[col_width]*beats)
@@ -128,6 +285,7 @@ def create_pdf(data):
         ('FONTNAME', (0, 0), (-1, -1), PDF_FONT),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTSIZE', (0, 0), (-1, -1), font_size),
     ]))
     elements.append(t)
     elements.append(Spacer(1, 12))
@@ -141,11 +299,11 @@ def create_pdf(data):
             table_data = [cells]
             t = Table(table_data, colWidths=[col_width]*beats)
             t.setStyle(TableStyle([
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                # Removed 'GRID' to remove the cell borders as requested
                 ('FONTNAME', (0, 0), (-1, -1), PDF_FONT),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('FONTSIZE', (0, 0), (-1, -1), font_size),
             ]))
             elements.append(t)
             elements.append(Spacer(1, 6))
