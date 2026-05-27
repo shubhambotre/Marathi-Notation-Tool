@@ -147,7 +147,9 @@ const App: React.FC = () => {
         setIsLoginView(true);
       }
     } catch (error: any) {
-      alert(error.response?.data?.msg || 'Authentication failed');
+      console.error('Auth error:', error);
+      const msg = error.response?.data?.msg || error.message || 'Authentication failed';
+      alert(msg);
     }
   };
 

@@ -38,6 +38,10 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
+with app.app_context():
+    db.create_all()
+    print(f" * Connected to Database: {'PostgreSQL (Neon)' if 'postgres' in app.config['SQLALCHEMY_DATABASE_URI'] else 'SQLite (Local)'}")
+
 import datetime
 
 # Models
@@ -64,6 +68,10 @@ with app.app_context():
 @app.route('/')
 def home():
     return {"status": "Backend is running", "message": "Marathi Music Notation API is active"}, 200
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"status": "ok", "message": "Backend is reachable"}), 200
 
 # Auth Routes
 @app.route('/api/signup', methods=['POST'])
@@ -372,4 +380,4 @@ def export_txt():
     return send_file(file_stream, as_attachment=True, download_name='notation.txt', mimetype='text/plain')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
