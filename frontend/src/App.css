@@ -801,7 +801,152 @@ body {
   border-radius: 5px;
 }
 
-@media (max-width: 1024px) {
-  .saptak-groups { grid-template-columns: 1fr; }
-  .header-top, .header-bottom { padding: 2rem; }
+@media (max-width: 1200px) {
+  .header-top, .header-bottom, .main-content {
+    padding: 2rem;
+  }
+  .title-input-field {
+    width: 50%;
+  }
+}
+
+@media (max-width: 992px) {
+  .header-top {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .controls-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .header-bottom {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .title-input-field {
+    width: 100%;
+    text-align: center;
+  }
+  .saptak-groups {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 0.8rem 1rem;
+  }
+  .header-top h1 {
+    font-size: 1.8rem;
+  }
+  .nav-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  .nav-btn {
+    padding: 0.6rem 1rem;
+    width: 100%;
+  }
+  .export-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-save, .btn-export {
+    width: 100%;
+    padding: 0.8rem 1rem;
+  }
+  .main-content {
+    padding: 2rem 1rem;
+  }
+  .rows-list {
+    padding: 1rem;
+  }
+  .header-text-input {
+    font-size: 1.5rem;
+    padding: 0.8rem 1rem;
+  }
+  .virtual-keyboard {
+    padding: 1.5rem;
+  }
+  .chip-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .key-chip {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+  .library-view {
+    padding: 1.5rem;
+  }
+  .library-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  .library-header h2 {
+    font-size: 2rem;
+  }
+  
+  /* Responsive Table to Cards */
+  .saved-work-table, .saved-work-table thead, .saved-work-table tbody, .saved-work-table th, .saved-work-table td, .saved-work-table tr {
+    display: block;
+  }
+  .saved-work-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  .saved-work-table tr {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .saved-work-table td {
+    border: none;
+    position: relative;
+    padding: 1rem !important;
+    padding-left: 45% !important;
+    text-align: right;
+  }
+  .saved-work-table td:before {
+    position: absolute;
+    left: 1rem;
+    width: 40%;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 800;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+  .saved-work-table td:nth-of-type(1):before { content: "Title"; }
+  .saved-work-table td:nth-of-type(2):before { content: "Taal"; }
+  .saved-work-table td:nth-of-type(3):before { content: "Created"; }
+  .saved-work-table td:nth-of-type(4):before { content: "Updated"; }
+  .saved-work-table td:nth-of-type(5):before { content: "Actions"; }
+  
+  .table-title-input {
+    text-align: right;
+  }
+  .action-cell {
+    display: flex !important;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .btn-delete-table {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .chip-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .keyboard-footer {
+    flex-wrap: wrap;
+  }
+  .keyboard-footer .key-chip {
+    flex: 1 1 40%;
+  }
 }
