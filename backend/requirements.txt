@@ -1,4 +1,10 @@
 flask
 flask-cors
+flask-sqlalchemy
+flask-jwt-extended
+passlib
 python-docx
 reportlab
+gunicorn
+psycopg2-binary
+python-dotenv

@@ -15,14 +15,23 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///marathi_notations.db'
+# Use DATABASE_URL from environment for production (Postgres), fallback to local SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///marathi_notations.db')
+# Fix for Render/Heroku Postgres URLs (they start with postgres:// but SQLAlchemy needs postgresql://)
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://", 1)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret-key-change-this-in-production'
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-key-change-this-in-production')
 import datetime
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 
@@ -171,8 +180,13 @@ def delete_notation(id):
     return jsonify({"msg": "Notation not found"}), 404
 
 # Font configuration
-# Nirmala UI is a common Windows font that supports Devanagari
-MARATHI_FONT_PATH = r"C:\Windows\Fonts\Nirmala.ttf"
+# For deployment on Linux (Render), we look for a font file in the backend directory.
+# Defaulting to a local fonts folder. User should upload a .ttf file there.
+LOCAL_FONT_PATH = os.path.join(os.path.dirname(__file__), 'fonts', 'Nirmala.ttf')
+# Fallback Windows path for local dev
+WINDOWS_FONT_PATH = r"C:\Windows\Fonts\Nirmala.ttf"
+
+MARATHI_FONT_PATH = LOCAL_FONT_PATH if os.path.exists(LOCAL_FONT_PATH) else WINDOWS_FONT_PATH
 PDF_FONT = 'Helvetica'
 if os.path.exists(MARATHI_FONT_PATH):
     try:

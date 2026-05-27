@@ -109,7 +109,7 @@ const App: React.FC = () => {
     e.preventDefault();
     try {
       if (isRecoverView) {
-        await axios.post('http://localhost:5000/api/recover-password', {
+        await axios.post(`${API_URL}/api/recover-password`, {
           username: usernameInput,
           secret_answer: secretAnswerInput,
           new_password: passwordInput
@@ -130,7 +130,7 @@ const App: React.FC = () => {
         payload.secret_answer = secretAnswerInput;
       }
 
-      const response = await axios.post(`http://localhost:5000/api/${endpoint}`, payload);
+      const response = await axios.post(`${API_URL}/api/${endpoint}`, payload);
 
       if (isLoginView) {
         const { access_token, username } = response.data;
@@ -162,7 +162,7 @@ const App: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:5000/api/get-question/${usernameInput}`);
+      const response = await axios.get(`${API_URL}/api/get-question/${usernameInput}`);
       setSecretQuestionInput(response.data.question);
       setIsRecoverView(true);
       setIsLoginView(false);
@@ -183,7 +183,7 @@ const App: React.FC = () => {
   const fetchSavedNotations = async () => {
     if (!token) return;
     try {
-      const response = await axios.get('http://localhost:5000/api/notations', {
+      const response = await axios.get(`${API_URL}/api/notations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSavedNotations(response.data);
@@ -209,7 +209,7 @@ const App: React.FC = () => {
         payload.id = parseInt(currentNotationId);
       }
 
-      const response = await axios.post('http://localhost:5000/api/notations', payload, {
+      const response = await axios.post(`${API_URL}/api/notations', payload, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -247,7 +247,7 @@ const App: React.FC = () => {
       const notation = savedNotations.find(n => n.id === id);
       if (!notation) return;
       
-      await axios.post('http://localhost:5000/api/notations', {
+      await axios.post(`${API_URL}/api/notations`, {
         id: id,
         title: newTitle,
         rows: notation.rows,
@@ -264,7 +264,7 @@ const App: React.FC = () => {
   const deleteNotation = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this notation?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/notations/${id}`, {
+      await axios.delete(`${API_URL}/api/notations/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchSavedNotations();
@@ -419,7 +419,7 @@ const App: React.FC = () => {
 
   const exportData = async (format: 'txt' | 'docx' | 'pdf') => {
     try {
-      const response = await axios.post(`http://localhost:5000/api/export/${format}`, {
+      const response = await axios.post(`${API_URL}/api/export/${format}`, {
         title,
         rows,
         taal_config: taal,
