@@ -49,6 +49,8 @@ const TAALS: Record<string, TaalConfig> = {
   }
 };
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const App: React.FC = () => {
   const [title, setTitle] = useState('Classical Composition');
   const [selectedTaal, setSelectedTaal] = useState<string>('teental');
@@ -209,7 +211,7 @@ const App: React.FC = () => {
         payload.id = parseInt(currentNotationId);
       }
 
-      const response = await axios.post(`${API_URL}/api/notations', payload, {
+      const response = await axios.post(`${API_URL}/api/notations`, payload, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
