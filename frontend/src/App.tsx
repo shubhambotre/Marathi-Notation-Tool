@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -77,6 +77,68 @@ const App: React.FC = () => {
 
   const taal = TAALS[selectedTaal];
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setToken(null);
+    setUser(null);
+    setSavedNotations([]);
+    setView('editor');
+  }, []);
+
+  const fetchSavedNotations = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await axios.get(`${API_URL}/api/notations`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedNotations(response.data);
+    } catch (error) {
+      console.error('Failed to fetch notations:', error);
+    }
+  }, [token]);
+
+  const saveNotation = useCallback(async (silent = false) => {
+    if (!token) {
+      if (!silent) setShowAuthModal(true);
+      return;
+    }
+    try {
+      const payload: any = {
+        title: title || 'Untitled Composition',
+        rows,
+        taal_key: selectedTaal
+      };
+      
+      if (currentNotationId && currentNotationId !== 'null') {
+        payload.id = parseInt(currentNotationId);
+      }
+
+      const response = await axios.post(`${API_URL}/api/notations`, payload, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data.id) {
+        setCurrentNotationId(response.data.id.toString());
+      }
+      
+      if (!silent) alert('Notation saved successfully!');
+      fetchSavedNotations();
+    } catch (error: any) {
+      console.error('Save failed details:', error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        alert('Your session has expired. Please login again to save your work.');
+        handleLogout();
+        setShowAuthModal(true);
+      } else {
+        if (!silent) alert(`Failed to save notation: ${error.response?.data?.msg || 'Check console for details'}`);
+      }
+    }
+  }, [token, title, rows, selectedTaal, currentNotationId, fetchSavedNotations, handleLogout]);
+
   // Auto-save logic
   useEffect(() => {
     if (token && currentNotationId && view === 'editor') {
@@ -85,13 +147,13 @@ const App: React.FC = () => {
       }, 3000); // 3 seconds debounce
       return () => clearTimeout(timer);
     }
-  }, [rows, title, selectedTaal, token, currentNotationId]);
+  }, [rows, title, selectedTaal, token, currentNotationId, view, saveNotation]);
 
   useEffect(() => {
     if (token) {
       fetchSavedNotations();
     }
-  }, [token]);
+  }, [token, fetchSavedNotations]);
 
   useEffect(() => {
     setRows(prevRows => prevRows.map(row => {
@@ -172,69 +234,6 @@ const App: React.FC = () => {
       setIsLoginView(false);
     } catch (error: any) {
       alert(error.response?.data?.msg || 'User not found');
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    setToken(null);
-    setUser(null);
-    setSavedNotations([]);
-    setView('editor');
-  };
-
-  const fetchSavedNotations = async () => {
-    if (!token) return;
-    try {
-      const response = await axios.get(`${API_URL}/api/notations`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSavedNotations(response.data);
-    } catch (error) {
-      console.error('Failed to fetch notations:', error);
-    }
-  };
-
-  const saveNotation = async (silent = false) => {
-    if (!token) {
-      if (!silent) setShowAuthModal(true);
-      return;
-    }
-    try {
-      const payload: any = {
-        title: title || 'Untitled Composition',
-        rows,
-        taal_key: selectedTaal
-      };
-      
-      // Only include id if it exists and is numeric
-      if (currentNotationId && currentNotationId !== 'null') {
-        payload.id = parseInt(currentNotationId);
-      }
-
-      const response = await axios.post(`${API_URL}/api/notations`, payload, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.data.id) {
-        setCurrentNotationId(response.data.id.toString());
-      }
-      
-      if (!silent) alert('Notation saved successfully!');
-      fetchSavedNotations();
-    } catch (error: any) {
-      console.error('Save failed details:', error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        alert('Your session has expired. Please login again to save your work.');
-        handleLogout();
-        setShowAuthModal(true);
-      } else {
-        if (!silent) alert(`Failed to save notation: ${error.response?.data?.msg || 'Check console for details'}`);
-      }
     }
   };
 
@@ -341,7 +340,6 @@ const App: React.FC = () => {
       
       if (newVal.length <= 10) {
         updateCell(activeCell.rowId, activeCell.cellIndex, newVal);
-        // Put focus back and restore cursor position
         setTimeout(() => {
           inputElement.focus();
           const newPos = start + char.length;
@@ -352,7 +350,7 @@ const App: React.FC = () => {
   };
 
   const handleKeyClick = (e: React.MouseEvent, char: string) => {
-    e.preventDefault(); // Prevent focus loss from input
+    e.preventDefault();
     appendToActiveCell(char);
   };
 
@@ -405,7 +403,6 @@ const App: React.FC = () => {
       const nextElement = document.getElementById(`cell-${nextRowId}-${nextCellIdx}`);
       if (nextElement) {
         (nextElement as HTMLInputElement).focus();
-        // Optionally select text or place cursor at appropriate end
         if (e.key === 'ArrowLeft') {
           setTimeout(() => {
             const el = nextElement as HTMLInputElement;
