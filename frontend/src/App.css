@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Sans+Devanagari:wght@100..900&family=Tiro+Devanagari+Marathi:ital@0;1&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+html {
+  font-size: 13px; /* Scales down the entire UI (approx 80% of 16px) */
+}
+
 .lobster-regular {
   font-family: "Lobster", sans-serif;
   font-weight: 400;
@@ -232,11 +236,12 @@ body {
 }
 
 .btn-save, .btn-export {
-  padding: 1rem 2rem;
+  padding: 0.9rem 1.8rem;
   border-radius: 6px;
-  font-weight: 800;
+  font-weight: 750;
+  font-size: 1.0rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   cursor: pointer;
   transition: var(--transition);
 }

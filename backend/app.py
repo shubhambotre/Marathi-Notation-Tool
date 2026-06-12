@@ -16,6 +16,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from dotenv import load_dotenv
+import pandas as pd
 
 # Load environment variables from .env file if it exists
 load_dotenv()
@@ -359,6 +360,57 @@ def create_txt(data):
             output.append(f"| {line} |")
     
     return "\n".join(output)
+
+def create_excel(data):
+    import io
+    from openpyxl.styles import Alignment
+    file_stream = io.BytesIO()
+    
+    taal_config = data.get('taal_config', {})
+    beats = taal_config.get('beats', 16)
+    bols = taal_config.get('bols', [])
+    markers = taal_config.get('markers', [])
+    beat_nums = [str(i+1) for i in range(beats)]
+    
+    excel_rows = []
+    excel_rows.append(['Title:', data.get('title', 'Untitled')])
+    excel_rows.append([]) # Empty row
+    
+    # Taal Header (Removing labels from first column)
+    excel_rows.append([''] + beat_nums)
+    excel_rows.append([''] + bols)
+    excel_rows.append([''] + markers)
+    excel_rows.append([]) # Empty row
+    
+    for row in data.get('rows', []):
+        if row['type'] == 'header':
+            excel_rows.append([row['content']])
+        elif row['type'] == 'notation':
+            cells = row.get('cells', [''] * beats)
+            # Removing 'Notation:' label from first column
+            excel_rows.append([''] + cells)
+            
+    df = pd.DataFrame(excel_rows)
+    with pd.ExcelWriter(file_stream, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, header=False, sheet_name='Notation')
+        
+        # Apply centering to all cells
+        workbook = writer.book
+        worksheet = workbook['Notation']
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        
+        for row in worksheet.iter_rows():
+            for cell in row:
+                cell.alignment = center_alignment
+        
+    file_stream.seek(0)
+    return file_stream
+
+@app.route('/api/export/xlsx', methods=['POST'])
+def export_xlsx():
+    data = request.json
+    file_stream = create_excel(data)
+    return send_file(file_stream, as_attachment=True, download_name='notation.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 @app.route('/api/export/docx', methods=['POST'])
 def export_docx():

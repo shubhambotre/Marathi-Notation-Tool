@@ -44,8 +44,104 @@ const TAALS: Record<string, TaalConfig> = {
   ektaal: {
     name: 'Ektaal',
     beats: 12,
-    bols: ['धिं', 'धिं', 'धा', 'गे', 'ति' , 'रक' , 'टूं' , 'ना' , 'क' , 'ता' , 'धा' , 'गे'],
+    bols: ['धिं', 'धिं', 'धा', 'गे', 'ति', 'रक', 'टूं', 'ना', 'क', 'ता', 'धा', 'गे'],
     markers: ['x', '', '0', '', '2', '', '0', '', '3', '', '4', '']
+  },
+  rupak: {
+    name: 'Rupak',
+    beats: 7,
+    bols: ['ती', 'ती', 'ना', 'धी', 'ना', 'धी', 'ना'],
+    markers: ['0', '', '', '2', '', '3', ''] // Rupak uniquely begins on a Khali/0
+  },
+  chautaal: {
+    name: 'Chautaal',
+    beats: 12,
+    bols: ['धा', 'धा', 'दिन', 'ता', 'किट', 'धा', 'दिन', 'ता', 'तिट', 'कत', 'गदि', 'गन'],
+    markers: ['x', '', '0', '', '2', '', '0', '', '3', '', '4', '']
+  },
+  dhamar: {
+    name: 'Dhamar',
+    beats: 14,
+    bols: ['क', 'धि', 'ट', 'धि', 'ट', 'धा', 'आ', 'ग', 'ति', 'ट', 'ति', 'ट', 'ता', 'आ'],
+    markers: ['x', '', '', '', '2', '', '', '0', '', '', '', '3', '', '']
+  },
+  deepchandi: {
+    name: 'Deepchandi',
+    beats: 14,
+    bols: ['धा', 'धिन', 'धा', 'धा', 'धिन', 'ता', 'तिन', 'धा', 'धा', 'धिन'], 
+    markers: ['x', '', '', '2', '', '', '0', '', '', '3', '', '', '', ''] // Often played with spaces/rests
+  },
+  tilwada: {
+    name: 'Tilwada',
+    beats: 16,
+    bols: ['धा', 'तिरकिट', 'धिन', 'धिन', 'धा', 'धा', 'तिन', 'तिन', 'ता', 'तिरकिट', 'धिन', 'धिन', 'धा', 'धा', 'धिन', 'धिन'],
+    markers: ['x', '', '', '', '2', '', '', '', '0', '', '', '', '3', '', '', '']
+  },
+  sultaal: {
+    name: 'Sultaal',
+    beats: 10,
+    bols: ['धा', 'धा', 'दिन', 'ता', 'किट', 'धा', 'तिट', 'कत', 'गदि', 'गन'],
+    markers: ['x', '', '0', '', '2', '', '3', '', '0', '']
+  },
+  roopakVariatkhamsa: { // Often referred to as Pancham Sawari
+    name: 'Pancham Sawari',
+    beats: 15,
+    bols: ['धी', 'ना', 'धी', 'धी', 'ना', 'धी', 'धी', 'ना', 'धी', 'धी', 'ना', 'ता', 'ता', 'धी', 'ना'],
+    markers: ['x', '', '', '2', '', '', '', '3', '', '', '', '0', '', '4', '']
+  },
+  adaChautaal: {
+    name: 'Ada Chautaal',
+    beats: 14,
+    bols: ['धिन', 'धिं', 'धा', 'गे', 'ति', 'रक', 'किट', 'तक', 'ता', 'तिं', 'ता', 'के', 'ति', 'रक'],
+    markers: ['x', '', '2', '', '0', '', '3', '', '0', '', '4', '', '5', '']
+  },
+  mattataal: {
+    name: 'Matta Taal',
+    beats: 9,
+    bols: ['धा', 'धिं', 'न', 'ता', 'तिं', 'न', 'धिन', 'धिन', 'धा'],
+    markers: ['x', '', '2', '', '0', '', '3', '', '']
+  },
+  gajajhampa: {
+    name: 'Gajajhampa',
+    beats: 15,
+    bols: ['धा', 'धिं', 'न', 'ता', 'किट', 'तक', 'गा', 'दि', 'ग', 'न', 'धा', 'तिं', 'न', 'ता', 'ता'],
+    markers: ['x', '', '', '2', '', '', '3', '', '', '0', '', '', '4', '', '']
+  },
+  shikhar: {
+    name: 'Shikhar Taal',
+    beats: 17,
+    bols: ['धा', 'दिं', 'ता', 'किट', 'धा', 'तिट', 'कत', 'गदि', 'गन', 'धा', 'धा', 'दिं', 'ता', 'किट', 'तक', 'ता', 'थुं'],
+    markers: ['x', '', '', '2', '', '', '3', '', '', '0', '', '', '', '4', '', '', '']
+  },
+  brahmTaal: {
+    name: 'Brahm Taal',
+    beats: 28,
+    bols: ['धा', 'धिन', 'ता', 'तिट', 'धा', 'गे', 'ना', 'तिं', 'ता', 'क', 'त्ता', 'धा', 'गे', 'तिं', 'ना', 'क', 'त्ता', 'थिं', 'ता', 'किट', 'तक', 'गदि', 'गन', 'धा', 'ता', 'क', 'त्ता', 'धा'],
+    markers: ['x', '', '2', '', '3', '', '4', '', '5', '', '0', '', '6', '', '7', '', '8', '', '0', '', '9', '', '10', '', '0', '', '11', '']
+  },
+  pashto: { // Often played in Ghazals and semi-classical music
+    name: 'Pashto',
+    beats: 7,
+    bols: ['तिं', 'तिं', 'ना', 'धिं', 'धा', 'गे', 'ना'],
+    markers: ['x', '', '', '2', '', '0', '']
+  },
+  khemta: { // Fast 6-beat cyclic rhythm popular in folk and semi-classical
+    name: 'Khemta',
+    beats: 6,
+    bols: ['धा', 'धिं', 'ना', 'ता', 'तिं', 'ना'],
+    markers: ['x', '', '', '0', '', '']
+  },
+  jhumra: { // Elegant, slow 14-beat cycle mostly used in Vilambit Khayal
+    name: 'Jhumra',
+    beats: 14,
+    bols: ['धिं', 'धा', 'तिरकिट', 'धिं', 'धिं', 'धा', 'गे', 'तिं', 'ता', 'तिरकिट', 'धिं', 'धिं', 'धा', 'गे'],
+    markers: ['x', '', '', '2', '', '', '', '0', '', '', '3', '', '', '']
+  },
+  panchamSawari: { 
+    name: 'Yat Taal', // Also known as Ektali variant in some regions
+    beats: 8,
+    bols: ['धा', 'धिन', 'ता', 'तित', 'ता', 'धिन', 'धा', 'धा'],
+    markers: ['x', '', '', '', '0', '', '', '']
   }
 };
 
@@ -56,7 +152,7 @@ const App: React.FC = () => {
   const [selectedTaal, setSelectedTaal] = useState<string>('teental');
   const [fontSize, setFontSize] = useState<number>(12);
   const [rows, setRows] = useState<NotationRow[]>([
-    { id: '1', type: 'header', content: 'Sthai' },
+    { id: '1', type: 'header', content: '' },
     { id: '2', type: 'notation', cells: Array(TAALS['teental'].beats).fill('') }
   ]);
   const [activeCell, setActiveCell] = useState<{ rowId: string, cellIndex: number } | null>(null);
@@ -418,7 +514,7 @@ const App: React.FC = () => {
     }
   };
 
-  const exportData = async (format: 'txt' | 'docx' | 'pdf') => {
+  const exportData = async (format: 'txt' | 'docx' | 'pdf' | 'xlsx') => {
     try {
       const response = await axios.post(`${API_URL}/api/export/${format}`, {
         title,
@@ -487,6 +583,7 @@ const App: React.FC = () => {
               <button className="btn-save" onClick={() => saveNotation()}>Save Work</button>
               <button className="btn-export" onClick={() => exportData('pdf')}>Export PDF</button>
               <button className="btn-export" onClick={() => exportData('docx')}>Word Doc</button>
+              <button className="btn-export" onClick={() => exportData('xlsx')}>Export Excel</button>
             </div>
           </div>
         )}
@@ -665,7 +762,7 @@ const App: React.FC = () => {
                         className="header-text-input" 
                         value={row.content} 
                         onChange={(e) => updateHeader(row.id, e.target.value)}
-                        placeholder="Section Header (e.g. Sthai, Antara)"
+                        placeholder="Section Header (e.g. Gat ,Sthai, Antara)"
                       />
                     ) : (
                       <div className="notation-row-grid" style={{ gridTemplateColumns: `repeat(${taal.beats}, 1fr)` }}>

@@ -6,7 +6,7 @@ A web-based full-stack application designed for writing and exporting Hindustani
 ## Architecture
 - **Frontend:** React (TypeScript) with Vanilla CSS.
 - **Backend:** Python (Flask) with SQLite for data persistence.
-- **Export Formats:** MS Word (DOCX) and PDF (via ReportLab).
+- **Export Formats:** MS Word (DOCX), PDF (via ReportLab), and MS Excel (XLSX).
 
 ## Project Structure
 - `frontend/`: React source code, components, and styles.
@@ -22,6 +22,7 @@ A web-based full-stack application designed for writing and exporting Hindustani
 - **Library Management:** Save, load, rename, and delete notation drafts in a personal library.
 - **Auto-Save:** Intelligent debounce-based auto-saving to prevent data loss.
 - **Musical Terminology:** Quick-access buttons for standard musical sections (Gat, Tana, Sthai, etc.).
+- **Multi-format Export:** Export compositions to PDF, Word, and Excel for professional use.
 
 ## Setup & Execution
 
@@ -47,6 +48,7 @@ A web-based full-stack application designed for writing and exporting Hindustani
 - **Cell Constraints:** Each notation cell is limited to 10 characters to maintain grid integrity.
 - **Session Management:** Uses JWT-based authentication with local storage for session persistence.
 - **Theming:** A custom "Sitar-inspired" theme using deep navies, metallic golds, and parchment backgrounds.
+- **UI Scaling:** The interface is scaled to 80% (root font-size: 13px) for optimal comfort and high-density information display.
 
 ## Future Enhancements
 - Support for custom Taal creation.

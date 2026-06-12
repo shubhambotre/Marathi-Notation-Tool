@@ -9,3 +9,5 @@ gunicorn
 psycopg2-binary
 python-dotenv
 psycopg2
+pandas
+openpyxl
